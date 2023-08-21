@@ -115,7 +115,7 @@ namespace FPS.Scripts.Game.ChangeLogic
 
                 _waweController.StartCor(randomData.WaweData.WawesData);
 
-                if (i != attackCount)
+                if (i != attackCount - 1)
                 {
                     yield return new WaitForSeconds(randomData.WaitAfterStartWaves);
                 }
