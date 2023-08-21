@@ -29,8 +29,6 @@ namespace FPS.Scripts.Game.ChangeLogic
 
         [SerializeField] private WaweController _waweController;
 
-        [SerializeField] private JumpWaweData _jumpWaweData;
-
         [SerializeField] private Animator _animator;
 
         [SerializeField] private AttackData[] _attackDatas;
@@ -49,9 +47,7 @@ namespace FPS.Scripts.Game.ChangeLogic
         [SerializeField] private float _walsDuration = 1f;
         [SerializeField] private float _walsY = -10f;
         [SerializeField] private Ease _ease = Ease.Linear;
-        
-        
-        
+
 
         private Coroutine _coroutine;
 
@@ -104,20 +100,32 @@ namespace FPS.Scripts.Game.ChangeLogic
         {
             var attackCount = Random.Range(MinAttack, MaxAttack + 1);
 
+            var waitDmg = 1f;
+
             for (int i = 0; i < attackCount; i++)
             {
                 var randomData = _attackDatas[Random.Range(0, _attackDatas.Length)];
 
                 //_enemyTurret.NeedLook = false;
                 _animator.SetTrigger(randomData.TriggerName);
-                
+
                 yield return new WaitForSeconds(randomData.WaitAfterStartAnim);
-                
+
                 _enemyTurret.NeedLook = true;
-                
-                _waweController.StartCor(_jumpWaweData.WawesData);
-                yield return new WaitForSeconds(randomData.WaitAfterStartWaves);
+
+                _waweController.StartCor(randomData.WaweData.WawesData);
+
+                if (i != attackCount)
+                {
+                    yield return new WaitForSeconds(randomData.WaitAfterStartWaves);
+                }
+                else
+                {
+                    waitDmg = randomData.WaitBeforeTurnOnDamage;
+                }
             }
+            
+            yield return new WaitForSeconds(waitDmg);
 
             _coroutine = StartCoroutine(WaitDamage());
         }
@@ -126,16 +134,15 @@ namespace FPS.Scripts.Game.ChangeLogic
         {
             Material[] mats = _skinnedMeshRenderer.materials;
 
-
             _baseHitBox.gameObject.SetActive(true);
             mats[0] = _redBodyMaterial;
-            
+
             _skinnedMeshRenderer.materials = mats;
-            
+
             yield return new WaitForSecondsRealtime(DamageTime);
-            
+
             _coroutine = StartCoroutine(GenerateWawes());
-            
+
             mats[0] = _defaultBodyMaterial;
             _skinnedMeshRenderer.materials = mats;
             _baseHitBox.gameObject.SetActive(false);
@@ -148,9 +155,10 @@ namespace FPS.Scripts.Game.ChangeLogic
 
             if (_needDownWals)
             {
-                _wals.transform.DOMove(new Vector3(_wals.transform.position.x, _walsY, _wals.transform.position.z), _walsDuration).SetEase(_ease);
+                _wals.transform.DOMove(new Vector3(_wals.transform.position.x, _walsY, _wals.transform.position.z),
+                    _walsDuration).SetEase(_ease);
             }
-            
+
             yield return new WaitForSeconds(0.2f);
             _gun.gameObject.SetActive(false);
             _enemyTurret.TurretAimPoint = _eyePos;

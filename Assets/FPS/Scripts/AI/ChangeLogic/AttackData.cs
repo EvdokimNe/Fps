@@ -9,5 +9,6 @@ namespace FPS.Scripts.AI.ChangeLogic
         public float WaitAfterStartAnim = 1f;
         public JumpWaweData WaweData;
         public float WaitAfterStartWaves = 5f;
+        public float WaitBeforeTurnOnDamage = 5f;
     }
 }
